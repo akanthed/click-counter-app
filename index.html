@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Counter Website</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+      text-align: center;
+      user-select: none;
+    }
+
+    .counter {
+      font-size: 6rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .pulse {
+      color: #4caf50;
+      transform: scale(1.1);
+    }
+
+    button {
+      font-size: 1.5rem;
+      padding: 0.5rem 2rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #e91e63;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover,
+    button:focus {
+      background-color: #d81b60;
+      outline: none;
+    }
+
+    @media (max-width: 600px) {
+      .counter {
+        font-size: 4rem;
+      }
+
+      button {
+        font-size: 1.2rem;
+        padding: 0.4rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="counter" class="counter" aria-live="polite">0</div>
+  <button id="resetBtn" aria-label="Reset counter">Reset</button>
+
+  <script>
+    const counterEl = document.getElementById('counter');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let count = parseInt(localStorage.getItem('counterValue')) || 0;
+    counterEl.textContent = count;
+
+    const updateCounter = (newVal) => {
+      counterEl.textContent = newVal;
+      localStorage.setItem('counterValue', newVal);
+      counterEl.classList.add('pulse');
+      setTimeout(() => counterEl.classList.remove('pulse'), 150);
+    };
+
+    document.body.addEventListener('click', (e) => {
+      if (e.target !== resetBtn) {
+        count += 1;
+        updateCounter(count);
+      }
+    });
+
+    resetBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent reset button click from bubbling
+      count = 0;
+      updateCounter(count);
+    });
+  </script>
+</body>
+</html>

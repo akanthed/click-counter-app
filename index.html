@@ -2,8 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Counter Website</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Click Counter – Count Clicks Online | ClickCounter.in</title>
+  <meta name="description" content="ClickCounter.in is a simple and fast online click counter tool. Easily count mouse or finger taps. No login required, mobile-friendly." />
+  <meta name="keywords" content="click counter, online counter, click tracker, tap counter, count clicks, digital counter" />
+  <meta name="author" content="ClickCounter.in" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Click Counter – Count Clicks Online" />
+  <meta property="og:description" content="A free and easy online click counter. Count your taps instantly from any device." />
+  <meta property="og:url" content="https://clickcounter.in/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://clickcounter.in/icon.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Click Counter – Count Clicks Online" />
+  <meta name="twitter:description" content="Fast and simple tool to count mouse or finger clicks. Works on mobile too!" />
+  <meta name="twitter:image" content="https://clickcounter.in/icon.png" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://clickcounter.in/" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="icon.png" type="image/png" />
+
   <style>
     body {
       margin: 0;
@@ -16,6 +41,19 @@
       background-color: #f5f5f5;
       text-align: center;
       user-select: none;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-top: 0;
+      color: #333;
+    }
+
+    p {
+      max-width: 600px;
+      color: #555;
+      font-size: 1rem;
+      margin: 0 20px 20px;
     }
 
     .counter {
@@ -61,6 +99,9 @@
 </head>
 <body>
 
+  <h1>Free Online Click Counter</h1>
+  <p>ClickCounter.in is a fast, responsive, and mobile-friendly tool that lets you count your clicks or taps effortlessly. Great for tracking reps, events, or just for fun.</p>
+
   <div id="counter" class="counter" aria-live="polite">0</div>
   <button id="resetBtn" aria-label="Reset counter">Reset</button>
 
@@ -86,7 +127,7 @@
     });
 
     resetBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // Prevent reset button click from bubbling
+      e.stopPropagation();
       count = 0;
       updateCounter(count);
     });

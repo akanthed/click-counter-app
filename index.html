@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ClickCounter.in – Tap Counter</title>
-  <meta name="description" content="Minimal online click counter. Tap anywhere to count. Perfect for mantra chanting, naam jap, or meditation.">
+  <meta name="description" content="Minimal tap counter. Tap anywhere to count. Ideal for mantra, naam jap, habits, and meditation.">
+
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
 
   <style>
     :root {
@@ -12,6 +15,7 @@
       --text: #111;
       --button-bg: #e91e63;
       --button-hover: #c2185b;
+      --accent: #4caf50;
     }
 
     .dark {
@@ -33,6 +37,7 @@
       justify-content: center;
       user-select: none;
       transition: background 0.3s ease, color 0.3s ease;
+      text-align: center;
     }
 
     .counter {
@@ -43,7 +48,38 @@
 
     .pulse {
       transform: scale(1.1);
-      color: #4caf50;
+      color: var(--accent);
+    }
+
+    .goal { margin-top: 0.5rem; font-size: 1rem; }
+
+    .celebrate {
+      margin-top: 0.6rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: green;
+      line-height: 1.4;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .celebrate.visible { opacity: 1; }
+
+    .progress-bar {
+      width: 200px;
+      height: 10px;
+      background: #ddd;
+      margin: 1rem auto 0;
+      border-radius: 5px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
     }
 
     .buttons {
@@ -55,6 +91,7 @@
 
     button {
       padding: 0.6rem 1.5rem;
+      min-width: 90px;
       font-size: 1rem;
       border: none;
       border-radius: 8px;
@@ -64,15 +101,13 @@
       transition: background 0.2s ease;
     }
 
-    button:hover {
-      background: var(--button-hover);
-    }
+    button:hover { background: var(--button-hover); }
 
     .dark-toggle {
       position: fixed;
       top: 10px;
       right: 10px;
-      padding: 0.3rem 0.6rem;
+      padding: 0.4rem 0.7rem;
       font-size: 0.9rem;
       border-radius: 5px;
       border: 1px solid #999;
@@ -80,26 +115,14 @@
       color: var(--text);
       cursor: pointer;
     }
-
-    .goal {
-      margin-top: 1rem;
-      font-size: 1rem;
-    }
-
-    .celebrate {
-      color: green;
-      font-weight: bold;
-      margin-top: 1rem;
-    }
   </style>
 </head>
 <body>
-
   <button class="dark-toggle" id="darkToggle">🌙</button>
   <div id="counter" class="counter">0</div>
   <div class="goal" id="goalText"></div>
-  <div class="celebrate" id="completionMsg"></div>
-
+  <div class="progress-bar" id="progressBar"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <div class="celebrate" id="completionMsg">🎉 Goal Reached!<br>Please Reset Counter.</div>
   <div class="buttons">
     <button id="resetBtn">Reset</button>
     <button id="setGoalBtn">Set Goal</button>
@@ -112,29 +135,42 @@
     const goalText = document.getElementById('goalText');
     const darkToggle = document.getElementById('darkToggle');
     const completionMsg = document.getElementById('completionMsg');
+    const progressFill = document.getElementById('progressFill');
+    const progressBar = document.getElementById('progressBar');
 
+    const jsConfetti = new JSConfetti();
     let count = parseInt(localStorage.getItem('counterValue')) || 0;
     let goal = parseInt(localStorage.getItem('goalValue')) || null;
+    let celebrated = false;
 
     function updateDisplay() {
       counterEl.textContent = count;
       localStorage.setItem('counterValue', count);
 
-      if (goal) {
+      if (goal && goal > 0) {
         goalText.textContent = `Goal: ${count} / ${goal}`;
+        progressBar.style.display = 'block';
+        const percent = Math.min((count / goal) * 100, 100);
+        progressFill.style.width = percent + '%';
+
         if (count >= goal) {
-          completionMsg.innerHTML = "🎉 Goal Reached!<br>Please Reset Counter.";
+          completionMsg.classList.add('visible');
+          if (!celebrated) {
+            jsConfetti.addConfetti({ emojis: ['🎉','🙏'], emojiSize: 40, confettiNumber: 150 });
+            celebrated = true;
+          }
         } else {
-          completionMsg.textContent = "";
+          completionMsg.classList.remove('visible');
+          celebrated = false;
         }
       } else {
-        goalText.textContent = "";
-        completionMsg.textContent = "";
+        goalText.textContent = '';
+        progressBar.style.display = 'none';
+        completionMsg.classList.remove('visible');
       }
 
       counterEl.classList.add('pulse');
       setTimeout(() => counterEl.classList.remove('pulse'), 150);
-      if (navigator.vibrate) navigator.vibrate(40);
     }
 
     document.body.addEventListener('click', (e) => {
@@ -145,18 +181,18 @@
       updateDisplay();
     });
 
-    resetBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
+    resetBtn.addEventListener('click', () => {
       count = 0;
+      celebrated = false;
       updateDisplay();
     });
 
-    setGoalBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const userGoal = prompt("Set a goal (e.g., 108):", goal || '');
-      if (userGoal && !isNaN(userGoal)) {
-        goal = parseInt(userGoal);
+    setGoalBtn.addEventListener('click', () => {
+      const input = prompt("Set a goal (e.g., 108):", goal || '');
+      if (input && !isNaN(input)) {
+        goal = parseInt(input);
         localStorage.setItem('goalValue', goal);
+        celebrated = false;
         updateDisplay();
       }
     });
@@ -166,7 +202,6 @@
       localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     });
 
-    // On load
     if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark');
     }

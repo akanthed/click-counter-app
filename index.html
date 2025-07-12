@@ -3,56 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClickCounter.in – Tap Counter</title>
+  <meta name="description" content="Minimal online click counter. Tap anywhere to count. Perfect for mantra chanting, naam jap, or meditation.">
 
-  <title>Click Counter – Count Clicks Online | Naam Jap Counter | ClickCounter.in</title>
-  <meta name="description" content="ClickCounter.in is a simple and fast online click counter tool. Ideal for Naam Jap, mantra chanting, japa mala, or habit tracking." />
-  <link rel="icon" href="icon.png" type="image/png" />
-  
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: var(--bg);
-      color: var(--text);
-      transition: background-color 0.3s ease, color 0.3s ease;
-      user-select: none;
-      text-align: center;
-    }
-
     :root {
       --bg: #f5f5f5;
-      --text: #000;
+      --text: #111;
       --button-bg: #e91e63;
-      --button-hover: #d81b60;
+      --button-hover: #c2185b;
     }
 
     .dark {
-      --bg: #121212;
-      --text: #ffffff;
+      --bg: #111;
+      --text: #fff;
       --button-bg: #bb86fc;
       --button-hover: #9c64dc;
     }
 
-    h1 {
-      font-size: 1.2rem;
-      margin: 1rem 0;
-    }
-
-    .instruction {
-      font-size: 0.95rem;
-      color: #777;
-      margin-bottom: 1rem;
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Arial', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .counter {
       font-size: 6rem;
       font-weight: bold;
-      margin-bottom: 1rem;
       transition: transform 0.2s ease;
     }
 
@@ -61,129 +46,132 @@
       color: #4caf50;
     }
 
+    .buttons {
+      position: fixed;
+      bottom: 20px;
+      display: flex;
+      gap: 1rem;
+    }
+
     button {
-      font-size: 1.2rem;
-      padding: 0.5rem 1.5rem;
-      margin: 0.5rem;
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
       border: none;
-      border-radius: 10px;
-      background-color: var(--button-bg);
+      border-radius: 8px;
+      background: var(--button-bg);
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background 0.2s ease;
     }
 
-    button:hover,
-    button:focus {
-      background-color: var(--button-hover);
-      outline: none;
+    button:hover {
+      background: var(--button-hover);
     }
 
-    .goal-display {
+    .dark-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.9rem;
+      border-radius: 5px;
+      border: 1px solid #999;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .goal {
       margin-top: 1rem;
       font-size: 1rem;
     }
 
-    .dark-toggle {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: transparent;
-      border: 1px solid #888;
-      border-radius: 5px;
-      color: var(--text);
-      padding: 0.3rem 0.8rem;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-
-    @media (max-width: 600px) {
-      .counter {
-        font-size: 4rem;
-      }
-      button {
-        font-size: 1rem;
-        padding: 0.4rem 1.2rem;
-      }
+    .celebrate {
+      color: green;
+      font-weight: bold;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
 
   <button class="dark-toggle" id="darkToggle">🌙</button>
-  <h1>ClickCounter.in – Naam Jap Clicker</h1>
-  <div class="instruction" id="instruction">Tap anywhere to count 🙏</div>
-  <div id="counter" class="counter" aria-live="polite">0</div>
-  <div class="goal-display" id="goalText"></div>
+  <div id="counter" class="counter">0</div>
+  <div class="goal" id="goalText"></div>
+  <div class="celebrate" id="completionMsg"></div>
 
-  <button id="resetBtn" aria-label="Reset counter">Reset</button>
-  <button id="setGoalBtn" aria-label="Set goal">Set Goal</button>
+  <div class="buttons">
+    <button id="resetBtn">Reset</button>
+    <button id="setGoalBtn">Set Goal</button>
+  </div>
 
   <script>
     const counterEl = document.getElementById('counter');
     const resetBtn = document.getElementById('resetBtn');
-    const goalText = document.getElementById('goalText');
-    const instruction = document.getElementById('instruction');
     const setGoalBtn = document.getElementById('setGoalBtn');
+    const goalText = document.getElementById('goalText');
     const darkToggle = document.getElementById('darkToggle');
+    const completionMsg = document.getElementById('completionMsg');
 
     let count = parseInt(localStorage.getItem('counterValue')) || 0;
     let goal = parseInt(localStorage.getItem('goalValue')) || null;
 
-    const updateCounter = () => {
+    function updateDisplay() {
       counterEl.textContent = count;
       localStorage.setItem('counterValue', count);
 
       if (goal) {
-        goalText.textContent = `Progress: ${count} / ${goal}`;
+        goalText.textContent = `Goal: ${count} / ${goal}`;
+        if (count >= goal) {
+          completionMsg.innerHTML = "🎉 Goal Reached!<br>Please Reset Counter.";
+        } else {
+          completionMsg.textContent = "";
+        }
       } else {
-        goalText.textContent = '';
+        goalText.textContent = "";
+        completionMsg.textContent = "";
       }
 
       counterEl.classList.add('pulse');
       setTimeout(() => counterEl.classList.remove('pulse'), 150);
-
-      if (window.navigator.vibrate) window.navigator.vibrate(50);
-    };
+      if (navigator.vibrate) navigator.vibrate(40);
+    }
 
     document.body.addEventListener('click', (e) => {
-      if (![resetBtn, setGoalBtn, darkToggle].includes(e.target)) {
-        count += 1;
-        updateCounter();
+      if ([resetBtn, setGoalBtn, darkToggle].includes(e.target)) return;
+      if (goal && count >= goal) return;
 
-        if (count === 1) {
-          instruction.style.display = 'none';
-        }
-      }
+      count++;
+      updateDisplay();
     });
 
     resetBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       count = 0;
-      updateCounter();
+      updateDisplay();
     });
 
     setGoalBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const userGoal = prompt('Set a counting goal (e.g., 108):', goal || '');
+      const userGoal = prompt("Set a goal (e.g., 108):", goal || '');
       if (userGoal && !isNaN(userGoal)) {
         goal = parseInt(userGoal);
         localStorage.setItem('goalValue', goal);
-        updateCounter();
+        updateDisplay();
       }
     });
 
     darkToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark');
-      const mode = document.body.classList.contains('dark') ? 'dark' : 'light';
-      localStorage.setItem('theme', mode);
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     });
 
-    // Init
+    // On load
     if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark');
     }
-    updateCounter();
+
+    updateDisplay();
   </script>
 </body>
 </html>

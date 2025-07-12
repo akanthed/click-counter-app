@@ -5,30 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Click Counter – Count Clicks Online | Naam Jap Counter | ClickCounter.in</title>
-  <meta name="description" content="ClickCounter.in is a simple and fast online click counter tool. Easily count mouse or finger taps. Also perfect for Naam Jap, mantra chanting, or japa mala counting. No login required, mobile-friendly." />
-  <meta name="keywords" content="click counter, online counter, count clicks, Naam Jap counter, mantra counter, japa counter, tap counter, digital counter, Om chanting, meditation counter" />
-  <meta name="author" content="ClickCounter.in" />
-  <meta name="robots" content="index, follow" />
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Click Counter – Count Clicks Online | Naam Jap Counter" />
-  <meta property="og:description" content="Free, clean, and mobile-friendly Naam Jap and mantra counter tool. Count your chants silently online." />
-  <meta property="og:url" content="https://clickcounter.in/" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://clickcounter.in/icon.png" />
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Click Counter – Count Clicks Online" />
-  <meta name="twitter:description" content="Fast and simple tool to count mouse or finger clicks. Works on mobile too!" />
-  <meta name="twitter:image" content="https://clickcounter.in/icon.png" />
-
-  <!-- Canonical -->
-  <link rel="canonical" href="https://clickcounter.in/" />
-
-  <!-- Favicon -->
+  <meta name="description" content="ClickCounter.in is a simple and fast online click counter tool. Ideal for Naam Jap, mantra chanting, japa mala, or habit tracking." />
   <link rel="icon" href="icon.png" type="image/png" />
-
+  
   <style>
     body {
       margin: 0;
@@ -38,29 +17,57 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: #f5f5f5;
-      text-align: center;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background-color 0.3s ease, color 0.3s ease;
       user-select: none;
+      text-align: center;
+    }
+
+    :root {
+      --bg: #f5f5f5;
+      --text: #000;
+      --button-bg: #e91e63;
+      --button-hover: #d81b60;
+    }
+
+    .dark {
+      --bg: #121212;
+      --text: #ffffff;
+      --button-bg: #bb86fc;
+      --button-hover: #9c64dc;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+    }
+
+    .instruction {
+      font-size: 0.95rem;
+      color: #777;
+      margin-bottom: 1rem;
     }
 
     .counter {
       font-size: 6rem;
       font-weight: bold;
       margin-bottom: 1rem;
-      transition: transform 0.2s ease, color 0.2s ease;
+      transition: transform 0.2s ease;
     }
 
     .pulse {
-      color: #4caf50;
       transform: scale(1.1);
+      color: #4caf50;
     }
 
     button {
-      font-size: 1.5rem;
-      padding: 0.5rem 2rem;
+      font-size: 1.2rem;
+      padding: 0.5rem 1.5rem;
+      margin: 0.5rem;
       border: none;
       border-radius: 10px;
-      background-color: #e91e63;
+      background-color: var(--button-bg);
       color: white;
       cursor: pointer;
       transition: background-color 0.3s ease;
@@ -68,59 +75,115 @@
 
     button:hover,
     button:focus {
-      background-color: #d81b60;
+      background-color: var(--button-hover);
       outline: none;
+    }
+
+    .goal-display {
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+
+    .dark-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: 1px solid #888;
+      border-radius: 5px;
+      color: var(--text);
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
+      cursor: pointer;
     }
 
     @media (max-width: 600px) {
       .counter {
         font-size: 4rem;
       }
-
       button {
-        font-size: 1.2rem;
-        padding: 0.4rem 1.5rem;
+        font-size: 1rem;
+        padding: 0.4rem 1.2rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 👇 SEO Content Hidden from Users, Visible to Google -->
-  <div style="height:0; overflow:hidden; position:absolute; left:-9999px;" aria-hidden="true">
-    Use ClickCounter.in as your Naam Jap counter – ideal for mantra counting and spiritual practice. 
-    Count your Om chanting, Hare Krishna japa, or any meditation repetitions easily and silently.
-  </div>
-
+  <button class="dark-toggle" id="darkToggle">🌙</button>
+  <h1>ClickCounter.in – Naam Jap Clicker</h1>
+  <div class="instruction" id="instruction">Tap anywhere to count 🙏</div>
   <div id="counter" class="counter" aria-live="polite">0</div>
+  <div class="goal-display" id="goalText"></div>
+
   <button id="resetBtn" aria-label="Reset counter">Reset</button>
+  <button id="setGoalBtn" aria-label="Set goal">Set Goal</button>
 
   <script>
     const counterEl = document.getElementById('counter');
     const resetBtn = document.getElementById('resetBtn');
+    const goalText = document.getElementById('goalText');
+    const instruction = document.getElementById('instruction');
+    const setGoalBtn = document.getElementById('setGoalBtn');
+    const darkToggle = document.getElementById('darkToggle');
 
     let count = parseInt(localStorage.getItem('counterValue')) || 0;
-    counterEl.textContent = count;
+    let goal = parseInt(localStorage.getItem('goalValue')) || null;
 
-    const updateCounter = (newVal) => {
-      counterEl.textContent = newVal;
-      localStorage.setItem('counterValue', newVal);
+    const updateCounter = () => {
+      counterEl.textContent = count;
+      localStorage.setItem('counterValue', count);
+
+      if (goal) {
+        goalText.textContent = `Progress: ${count} / ${goal}`;
+      } else {
+        goalText.textContent = '';
+      }
+
       counterEl.classList.add('pulse');
       setTimeout(() => counterEl.classList.remove('pulse'), 150);
+
+      if (window.navigator.vibrate) window.navigator.vibrate(50);
     };
 
     document.body.addEventListener('click', (e) => {
-      if (e.target !== resetBtn) {
+      if (![resetBtn, setGoalBtn, darkToggle].includes(e.target)) {
         count += 1;
-        updateCounter(count);
+        updateCounter();
+
+        if (count === 1) {
+          instruction.style.display = 'none';
+        }
       }
     });
 
     resetBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       count = 0;
-      updateCounter(count);
+      updateCounter();
     });
+
+    setGoalBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const userGoal = prompt('Set a counting goal (e.g., 108):', goal || '');
+      if (userGoal && !isNaN(userGoal)) {
+        goal = parseInt(userGoal);
+        localStorage.setItem('goalValue', goal);
+        updateCounter();
+      }
+    });
+
+    darkToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const mode = document.body.classList.contains('dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', mode);
+    });
+
+    // Init
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
+    }
+    updateCounter();
   </script>
 </body>
 </html>

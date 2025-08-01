@@ -189,7 +189,13 @@
 
     setGoalBtn.addEventListener('click', () => {
       const input = prompt("Set a goal (e.g., 108):", goal || '');
-      if (input && !isNaN(input)) {
+      if (input === null || input.trim() === '') {
+        // User cancelled or cleared input: remove goal
+        goal = null;
+        localStorage.removeItem('goalValue');
+        celebrated = false;
+        updateDisplay();
+      } else if (!isNaN(input)) {
         goal = parseInt(input);
         localStorage.setItem('goalValue', goal);
         celebrated = false;
